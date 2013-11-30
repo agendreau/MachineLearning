@@ -70,30 +70,65 @@ X = [ones(m, 1) X];
     size(A2,2);
 
     A3 = sigmoid(Theta2*A2');
-    size(A3,1)
-    size(A3,2)
+    size(A3,1);
+    size(A3,2);
     I = eye(num_labels);
     
     for i=1:m
-        A3(:,i);
-        -I(:,y(i));
-        1-A3(:,i);
-        1-I(:,y(i));
-        (log(A3(:,i)).*(-I(:,y(i))))
-        (log(1-A3(:,i)))
-        (log(A3(:,i)).*(-I(:,y(i))))+(log(1-A3(:,i)).*(1-I(:,y(i))))
         J = sum((log(A3(:,i)).*(-I(:,y(i))))-(log(1-A3(:,i)).*(1-I(:,y(i)))))+J;
     end
     
-    J
+    J;
     
-    J = (1/m)*J
+    reg = sum(sum(Theta1(:,2:end).*Theta1(:,2:end)))+sum(sum(Theta2(:,2:end).*Theta2(:,2:end)));
+    
+    J = (1/m)*J + ((lambda/(2*m))*reg);
+    
+    Delta = 0;
+    
+    temp1 = (Theta1*X')';
+    temp2 = (Theta2*A2')';
+    
+    for t=1:m
+        a1 = (X(t,:))';
+        size(a1,1);
+        size(a1,2);
+        size(Theta1,1);
+        size(Theta1,2);
+        z2 = Theta1*a1;%temp1(t,:);
+
+        a2 = [1; sigmoid(z2)];
+        size(a2,1);
+        size(a2,2);
+
+        z3 = Theta2*a2;
+        a3 = sigmoid(z3);
+        
+        yk = I(:,y(t));
+        
+        delta3 = a3 - yk;
+        size(delta3,1);
+        size(delta3,2);
+        size(Theta2(:,2:end),1);
+        size(Theta2(:,2:end),2);
+        size(sigmoidGradient(z2),1);
+        size(sigmoidGradient(z2),2);
+        
+        delta2 = Theta2(:,2:end)'*delta3.*sigmoidGradient(z2);
+  
+        Theta1_grad = Theta1_grad + delta2*a1';
+        Theta2_grad = Theta2_grad + delta3*a2';
+        
+    end
+    
+    Theta1_grad = (1/m)*Theta1_grad+[zeros(size(Theta1,1),1) (lambda/m)*Theta1(:,2:end)];
+    Theta2_grad = (1/m)*Theta2_grad+[zeros(size(Theta2,1),1) (lambda/m)*Theta2(:,2:end)];
     
     %J = (1/m)*sum(sum(Y));
     %yk = [];
     %for K=1:num_labels
      %   yk = [yk y==K];
-    %end
+    %end(
     %yk = repmat(1:num_labels,size(y,1),1)==repmat(y,1,num_labels);
     %size(yk,1)
     %size(yk,2)
